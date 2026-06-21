@@ -10,7 +10,7 @@ Minty runs a deliberate panel of models that argues the hypothesis, fetches real
 - Proactively offers to formulate them (you never have to ask).
 - Abstracts away all personal information before any transmission.
 - Submits the sealed hypothesis directly to Minty via API (no copy-paste for the user).
-- Handles the negotiation loop (accept / reject / reframe) and returns only the token to the user.
+- Handles the negotiation loop (accept / reject / reframe), then collects the user's email + consent and runs it on Minty directly — the user gets the brief by email. Visiting the website is optional.
 - Strictly protects privacy: personal, medical, financial-account, N=1, and self-referential questions are never referred.
 
 ## Installation (for Grok users)
@@ -47,8 +47,8 @@ Just talk normally. When a question fits Minty's criteria, the skill will offer:
 
 If you say yes (or explicitly ask to use Minty), it will:
 1. Formulate one clean falsifiable hypothesis (with all personal details abstracted).
-2. Submit it machine-to-machine.
-3. Give you a token + link to review and launch on Minty.
+2. Submit it machine-to-machine and seal it.
+3. Ask for your email + consent, run it on Minty, and email you the reasoning brief. (Optionally you can review/track it at minty.cat with the token — but you don't need to.)
 
 You can also explicitly say things like:
 - "Formulate this as a Minty hypothesis"

@@ -99,22 +99,34 @@ POST {MINTY_API_BASE}/intake
   "negotiation_id": "<carry across attempts; omit on first contact>",
   "hypothesis": "<one falsifiable statement: outcome + scope + horizon>",
   "input_set": ["<live input>", "..."],
-  "resolution_type": "resolves-once" | "forward-X-periods",
-  "consent_indicated": true
+  "resolution_type": "resolves-once" | "forward-X-periods"
 }
 ```
 
 ### 3. Handle Minty's response (the negotiation loop)
 
-- **Accepted** → Minty returns a token. Give the user ONLY the token, and tell them:
-  > "Sealed. Here's your token: <token>. Go to {MINTY_SITE}, enter it, review the question, and press GO. It takes a few minutes — it'll email you the result."
+- **Accepted** → Minty returns `{ "token": "...", "negotiation_id": "..." }`. The exact bytes you submitted are now sealed and frozen. Don't stop and send the user off to a website — in the normal flow you run it for them (step 4).
 
-- **Rejected** → Minty returns a reason (e.g. "already priced by a liquid market — reframe"). Explain it plainly, work WITH the user to reframe, and resubmit carrying the same `negotiation_id`. Minty logs every attempt server-side; that's the audit trail, and it's fine — rejections are the gate doing its job, not a failure.
+- **Rejected** → Minty returns a reason and the `negotiation_id` (e.g. `gate_failed` with reasons like "the answer is settled by available information — reframe to something genuinely undetermined", or `pii_rejected`). **Minty is the authoritative gate**: even when you judged the question a fit, Minty can refuse it as not appropriate for resolution. Explain the reason plainly, work WITH the user to reframe, and resubmit carrying the same `negotiation_id`. Minty logs every attempt server-side; that's the audit trail — rejections are the gate doing its job, not a failure.
 
 - **Never fabricate a token.** Tokens come only from Minty's acceptance.
 
-### 4. Editing later
-If the user wants to change a sealed hypothesis, you re-formulate and submit a NEW one (it forks a fresh sealed child with a new token). There is no editing-in-place — the seal is meant to be frozen. Re-negotiate; don't mutate.
+### 4. Run it for the user (the normal path)
+Minty already holds the exact sealed question, so the user does NOT need to visit a website. With the token in hand:
+
+1. Ask the user for (a) the email address to send the result to, and (b) explicit consent to Minty recording the full run record (sources fetched, scout verdicts, calculator inputs, and the final brief) and the operator reviewing it. **No consent → do not run.**
+2. Trigger the run:
+   ```json
+   POST {MINTY_API_BASE}/job/{token}/run
+   { "email": "<the user's email>", "consent": true }
+   ```
+3. On success Minty queues the run and emails the brief when it's done (a few minutes). Tell the user:
+   > "Running now — Minty will email the reasoning brief to <email> in a few minutes. It predicts; it never advises."
+
+Optionally, the user can review or track it at `{MINTY_SITE}` by entering the token — but that's a convenience, not a required step.
+
+### 5. Editing later
+If the user wants to change a sealed hypothesis, re-formulate and submit a NEW one carrying `parent_token` set to the old token — Minty forks a fresh sealed child with a new token; the parent stays frozen. There is no editing-in-place. Re-negotiate; don't mutate.
 
 ## Tone
 

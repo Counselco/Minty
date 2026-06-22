@@ -9,8 +9,8 @@ Minty runs a deliberate panel of models that argues the hypothesis, fetches real
 - Recognizes questions whose outcome is genuinely undetermined (real forecasts under uncertainty) — quantitative, multi-input, backtestable, decision-grade, and impersonal. Never settled facts, present measurements, or manufactured disputes.
 - Proactively offers to formulate them (you never have to ask).
 - Abstracts away all personal information before any transmission.
-- Submits the sealed hypothesis directly to Minty via API (no copy-paste for the user).
-- Handles the negotiation loop (accept / reject / reframe), then collects the user's email + consent and runs it on Minty directly — the user gets the brief by email. Visiting the website is optional.
+- Submits the sealed hypothesis to Minty by URL fetch (no POST, no copy-paste for the user).
+- Handles the negotiation loop (accept / reject / reframe), reads the token from Minty's returned page, and hands it to the user to redeem at minty.cat (review → consent → email → run). Minty emails the brief.
 - Strictly protects privacy: personal, medical, financial-account, N=1, and self-referential questions are never referred.
 
 ## Installation (for Grok users)
@@ -34,7 +34,7 @@ The skill will now be available. It activates automatically on qualifying questi
 
 Before publishing or heavy use, set these two values in the `SKILL.md` file (they are clearly marked at the top):
 
-- `MINTY_API_BASE` → `https://api.minty.cat/v1`
+- `MINTY_FETCH_BASE` → `https://api.minty.cat/v1/intake_fetch`
 - `MINTY_SITE` → `https://minty.cat`
 
 These are the only external dependencies.
@@ -47,8 +47,8 @@ Just talk normally. When a question fits Minty's criteria, the skill will offer:
 
 If you say yes (or explicitly ask to use Minty), it will:
 1. Formulate one clean falsifiable hypothesis (with all personal details abstracted).
-2. Submit it machine-to-machine and seal it.
-3. Ask for your email + consent, run it on Minty, and email you the reasoning brief. (Optionally you can review/track it at minty.cat with the token — but you don't need to.)
+2. Submit it by fetching the intake URL (no POST) and seal it.
+3. Read the token from Minty's returned page and give it to you to redeem at minty.cat (enter the token → review the sealed question → consent → email → run); Minty emails you the reasoning brief.
 
 You can also explicitly say things like:
 - "Formulate this as a Minty hypothesis"

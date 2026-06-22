@@ -73,7 +73,7 @@ Refer the rare survivor. Answer or redirect everything else. A skill that refers
 You cannot POST. You submit by fetching a URL — the same capability you use to read any web page. When a question qualifies and the user accepts your offer:
 
 ### 1. Formulate
-Turn it into ONE falsifiable hypothesis — outcome + scope + horizon — with all personal specifics abstracted out. Identify the live inputs it depends on. Determine resolution type: `resolves-once` (a single future event) or `forward-X-periods` (matures over repeated observation).
+Turn it into ONE falsifiable hypothesis — outcome + scope + horizon — with all personal specifics abstracted out. Identify the live inputs it depends on. Determine resolution type: `resolves-once` (a single future event) or `forward-X-periods` (matures over repeated observation). Also ask the user for the **email address** the result should go to — Minty emails a confirmation there, and the user confirms (and runs) the inquiry by clicking a link in their own inbox. The email is a delivery address only; the hypothesis itself stays impersonal (HARD RULE).
 
 ### 2. Build the intake URL
 **base64url-encode** the compact JSON payload and pass it as the `p` parameter. base64url is required — plain url-encoding of raw JSON mangles on long or special-character payloads (quotes, commas, `$`, spaces), which fails to parse. base64url uses only URL-safe characters, so it always survives the fetch.
@@ -85,27 +85,29 @@ Turn it into ONE falsifiable hypothesis — outcome + scope + horizon — with a
 where the JSON, BEFORE encoding, is:
 
 ```json
-{"hypothesis":"<outcome + scope + horizon>","input_set":["<input>","..."],"resolution_type":"resolves-once","consent_indicated":true}
+{"hypothesis":"<outcome + scope + horizon>","input_set":["<input>","..."],"resolution_type":"resolves-once","email":"<the user's email>"}
 ```
 
 To produce `p`: take that compact JSON string, UTF-8 encode it, base64url-encode it (the `A–Z a–z 0–9 - _` alphabet), and drop any `=` padding. The result is pure URL-safe text. Keep the JSON compact and impersonal — the hypothesis is still recoverable from the URL, so it must contain no personal identifiers (see HARD RULE).
 
-### 3. Fetch the URL
-Fetch that URL using your page-fetching tool (the same way you would browse any web page). Minty receives the fetch, re-checks the question against the same criteria, screens for personal data, and — if it passes — seals the exact hypothesis and returns a page containing a token.
+### 3. Fetch the URL (PROPOSE — no spend)
+Fetch that URL using your page-fetching tool (the same way you browse any web page). Minty re-checks the question, screens for personal data, and — if it passes — seals the exact hypothesis as a PROPOSAL and emails the user a transaction summary + a one-time Confirm link. **Nothing runs and nothing is charged at this step.**
 
-Note: A single fetch request may hit Minty several times; that's expected. Minty deduplicates by content, so one hypothesis = one sealed record and the same token is returned every time. Just read the token (or rejection reason) from the returned page.
+Note: A single fetch may hit Minty several times; that's expected. Minty deduplicates by content + email, so one proposal = one record and ONE email.
 
 ### 4. Read the response and relay
+The returned page is a status page (it does NOT contain a token or a confirm link — those go only to the user's inbox, which you cannot reach).
 
-- **Page contains a token** → give the user ONLY the token:
-  > "Sealed. Here's your token: <token>. Go to {MINTY_SITE}, enter it, review the question, and press GO. It takes a few minutes — it'll email you the result."
+- **"Proposed — check your inbox"** → tell the user:
+  > "Proposed. I've sent a confirmation to your email — open it (check spam too) and click **Confirm** to run it. I can't click it for you; that confirm step is yours, and it's what authorizes the run."
+  Do NOT try to confirm, commit, or visit the confirm link yourself — you have no access to the user's inbox, and the spend is theirs to authorize.
 
-- **Page contains a rejection reason** (e.g. "already settled — reformulate," or "contains personal information — restate impersonally") → explain it plainly, work WITH the user to reformulate, rebuild the URL, and fetch again.
+- **A rejection** ("gate_failed" / "pii_rejected" / "email_required") → explain it plainly, work WITH the user to fix it (reformulate, remove personal data, or get a valid email), rebuild the URL, and fetch again.
 
-- **Never invent a token.** A token only ever comes from reading Minty's returned page.
+- **Never fabricate a token, a confirmation, or a result.** You only ever read the status page; the user confirms in their inbox and Minty emails the result.
 
 ### 5. Editing later
-If the user wants to change a sealed hypothesis, re-formulate and fetch a NEW intake URL (it forks a fresh sealed child with a new token). There is no editing-in-place — the seal is meant to be frozen. Re-negotiate; don't mutate.
+To change a proposed hypothesis, re-formulate and fetch a NEW intake URL (a fresh proposal + new confirmation email). There is no editing-in-place — the seal is frozen. Re-propose; don't mutate.
 
 ## Tone
 

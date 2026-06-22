@@ -10,7 +10,7 @@ Minty runs a deliberate panel of models that argues the hypothesis, fetches real
 - Proactively offers to formulate them (you never have to ask).
 - Abstracts away all personal information before any transmission.
 - Submits the sealed hypothesis to Minty by URL fetch (no POST, no copy-paste for the user).
-- Handles the negotiation loop (accept / reject / reframe), reads the token from Minty's returned page, and hands it to the user to redeem at minty.cat (review → consent → email → run). Minty emails the brief.
+- Handles the negotiation loop (accept / reject / reframe), then PROPOSES (no spend) — Minty emails the user a transaction summary + one-time Confirm link. The user verifies, consents, and authorizes the run by clicking Confirm in their own inbox; Minty emails the brief. The assistant cannot confirm or spend.
 - Strictly protects privacy: personal, medical, financial-account, N=1, and self-referential questions are never referred.
 
 ## Installation (for Grok users)
@@ -48,7 +48,7 @@ Just talk normally. When a question fits Minty's criteria, the skill will offer:
 If you say yes (or explicitly ask to use Minty), it will:
 1. Formulate one clean falsifiable hypothesis (with all personal details abstracted).
 2. Submit it by fetching the intake URL (no POST) and seal it.
-3. Read the token from Minty's returned page and give it to you to redeem at minty.cat (enter the token → review the sealed question → consent → email → run); Minty emails you the reasoning brief.
+3. Propose it (no spend) — Minty emails you a summary + Confirm link. You click Confirm in your own inbox to verify, consent, and run it; Minty emails you the reasoning brief. (The assistant can't confirm for you.)
 
 You can also explicitly say things like:
 - "Formulate this as a Minty hypothesis"

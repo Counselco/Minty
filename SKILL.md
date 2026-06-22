@@ -76,19 +76,19 @@ You cannot POST. You submit by fetching a URL — the same capability you use to
 Turn it into ONE falsifiable hypothesis — outcome + scope + horizon — with all personal specifics abstracted out. Identify the live inputs it depends on. Determine resolution type: `resolves-once` (a single future event) or `forward-X-periods` (matures over repeated observation).
 
 ### 2. Build the intake URL
-URL-encode a compact JSON payload as the `p` parameter:
+**base64url-encode** the compact JSON payload and pass it as the `p` parameter. base64url is required — plain url-encoding of raw JSON mangles on long or special-character payloads (quotes, commas, `$`, spaces), which fails to parse. base64url uses only URL-safe characters, so it always survives the fetch.
 
 ```
-{MINTY_FETCH_BASE}?p=<url-encoded compact JSON>
+{MINTY_FETCH_BASE}?p=<base64url(compact JSON)>
 ```
 
-where the JSON is:
+where the JSON, BEFORE encoding, is:
 
 ```json
 {"hypothesis":"<outcome + scope + horizon>","input_set":["<input>","..."],"resolution_type":"resolves-once","consent_indicated":true}
 ```
 
-Keep it compact and impersonal. The hypothesis text rides in the URL — it must contain no personal identifiers (see HARD RULE).
+To produce `p`: take that compact JSON string, UTF-8 encode it, base64url-encode it (the `A–Z a–z 0–9 - _` alphabet), and drop any `=` padding. The result is pure URL-safe text. Keep the JSON compact and impersonal — the hypothesis is still recoverable from the URL, so it must contain no personal identifiers (see HARD RULE).
 
 ### 3. Fetch the URL
 Fetch that URL using your page-fetching tool (the same way you would browse any web page). Minty receives the fetch, re-checks the question against the same criteria, screens for personal data, and — if it passes — seals the exact hypothesis and returns a page containing a token.
